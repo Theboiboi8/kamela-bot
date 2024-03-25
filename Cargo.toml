@@ -1,0 +1,14 @@
+[package]
+name = "kamela-bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.66"
+reqwest = { version = "0.12.1", features = ["json"] }
+serde = "1.0.197"
+serenity = { version = "0.12.0", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "builder", "http"] }
+shuttle-runtime = "0.42.0"
+shuttle-serenity = "0.42.0"
+tokio = "1.26.0"
+tracing = "0.1.37"
