@@ -1,17 +1,11 @@
 use anyhow::Context as _;
-use serenity::all::{
-	Command,
-	CreateCommand,
-	CreateCommandOption,
-	CreateInteractionResponse,
-	CreateInteractionResponseMessage,
-	Interaction
-};
+use serenity::all::{Command, CreateCommand, CreateCommandOption, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, Interaction};
 use serenity::async_trait;
+use serenity::gateway::ActivityData;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use shuttle_runtime::SecretStore;
-use tracing::{error, info};
+use tracing::{info};
 
 mod weather;
 
@@ -42,13 +36,21 @@ impl EventHandler for Bot {
 	    let _commands_global =
 		    Command::set_global_commands(&context.http, commands_vec.clone());
 
-        info!("Registered commands: {:#?}", commands_vec);
+        info!("Registered commands: {:#?}", commands_vec.clone());
     }
 
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
             let response_content = match command.data.name.as_str() {
-                "info" => format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION")).to_owned(),
+                "info" => {
+	                CreateEmbed::new()
+		                .colour(0xDFFF00)
+		                .description("A general-purpose Discord bot.")
+		                .footer(CreateEmbedFooter::new(
+			                format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
+		                ))
+		                .title("Info")
+                },
 	            "weather" => {
 		            let argument = command
 			            .data
@@ -62,10 +64,24 @@ impl EventHandler for Bot {
 			            weather::get_forecast(place, &self.weather_api_key, &self.client).await;
 		            match result {
 			            Ok((location, forecast)) => {
-				            format!("Forecast: {} in {}", forecast.headline.overview, location)
+				            CreateEmbed::new()
+					            .colour(0xDFFF00)
+					            .description(
+						            format!("Forecast: {} in {}", forecast.headline.overview, location)
+					            )
+					            .footer(CreateEmbedFooter::new(
+						            format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
+					            ))
+					            .title(format!("Weather: {place}"))
 			            }
 			            Err(err) => {
-				            format!("Error: {err}")
+				            CreateEmbed::new()
+					            .colour(0xFF0037)
+					            .description(format!("Error: {err}"))
+					            .footer(CreateEmbedFooter::new(
+						            format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
+					            ))
+					            .title("Error!")
 			            }
 		            }
 	            }
@@ -73,8 +89,7 @@ impl EventHandler for Bot {
             };
 
             let data =
-	            CreateInteractionResponseMessage::new()
-		            .content(response_content);
+	            CreateInteractionResponseMessage::new().embed(response_content);
             let builder = CreateInteractionResponse::Message(data);
 
             if let Err(why) = command.create_response(&ctx.http, builder).await {
@@ -96,8 +111,7 @@ async fn serenity(
     let weather_api_key = secrets
         .get("WEATHER_API_KEY")
         .context("'WEATHER_API_KEY' was not found")?;
-
-
+	
     let client = get_client(
         &discord_token,
         &weather_api_key,
@@ -107,18 +121,21 @@ async fn serenity(
 
 #[allow(clippy::missing_panics_doc)]
 pub async fn get_client(
-    discord_token: &str,
-    weather_api_key: &str,
+	discord_token: &str,
+	weather_api_key: &str,
 ) -> Client {
     // Set gateway intents, which decides what events the bot will be notified about.
     // Here we don't need any intents so empty
-    let intents = GatewayIntents::empty();
+    let intents = GatewayIntents::default();
 
     Client::builder(discord_token, intents)
         .event_handler(Bot {
             weather_api_key: weather_api_key.to_owned(),
             client: reqwest::Client::new(),
         })
+	    .activity(
+		    ActivityData::custom("General Purpose Discord Bot")
+	    )
         .await
-        .expect("Err creating client")
+        .expect("Error creating client")
 }
