@@ -1,18 +1,23 @@
-mod weather;
-
 use anyhow::Context as _;
-use serenity::all::{ApplicationId, Command, CreateCommand, CreateCommandOption, CreateInteractionResponse, CreateInteractionResponseMessage, GuildId, Interaction};
+use serenity::all::{
+	Command,
+	CreateCommand,
+	CreateCommandOption,
+	CreateInteractionResponse,
+	CreateInteractionResponseMessage,
+	Interaction
+};
 use serenity::async_trait;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use shuttle_runtime::SecretStore;
 use tracing::{error, info};
 
+mod weather;
+
 struct Bot {
     weather_api_key: String,
     client: reqwest::Client,
-    discord_guild_id: GuildId,
-	discord_application_id: ApplicationId,
 }
 
 #[async_trait]
@@ -33,12 +38,6 @@ impl EventHandler for Bot {
 			        )
 		        )
         ];
-
-        let _commands_guild = &self
-	        .discord_guild_id
-	        .set_commands(&context.http, commands_vec.clone())
-	        .await
-	        .unwrap();
 
 	    let _commands_global =
 		    Command::set_global_commands(&context.http, commands_vec.clone());
@@ -73,7 +72,9 @@ impl EventHandler for Bot {
                 command => unreachable!("Unknown command: {}", command),
             };
 
-            let data = CreateInteractionResponseMessage::new().content(response_content);
+            let data =
+	            CreateInteractionResponseMessage::new()
+		            .content(response_content);
             let builder = CreateInteractionResponse::Message(data);
 
             if let Err(why) = command.create_response(&ctx.http, builder).await {
@@ -96,19 +97,10 @@ async fn serenity(
         .get("WEATHER_API_KEY")
         .context("'WEATHER_API_KEY' was not found")?;
 
-    let discord_guild_id = secrets
-        .get("DISCORD_GUILD_ID")
-        .context("'DISCORD_GUILD_ID' was not found")?;
-
-	let discord_application_id = secrets
-		.get("DISCORD_APPLICATION_ID")
-		.context("'DISCORD_APPLICATION_ID' was not found")?;
 
     let client = get_client(
         &discord_token,
         &weather_api_key,
-        discord_guild_id.parse().unwrap(),
-	    discord_application_id.parse().unwrap(),
     ).await;
     Ok(client.into())
 }
@@ -117,8 +109,6 @@ async fn serenity(
 pub async fn get_client(
     discord_token: &str,
     weather_api_key: &str,
-    discord_guild_id: u64,
-	discord_application_id: u64,
 ) -> Client {
     // Set gateway intents, which decides what events the bot will be notified about.
     // Here we don't need any intents so empty
@@ -128,8 +118,6 @@ pub async fn get_client(
         .event_handler(Bot {
             weather_api_key: weather_api_key.to_owned(),
             client: reqwest::Client::new(),
-            discord_guild_id: GuildId::new(discord_guild_id),
-	        discord_application_id: ApplicationId::new(discord_application_id)
         })
         .await
         .expect("Err creating client")
