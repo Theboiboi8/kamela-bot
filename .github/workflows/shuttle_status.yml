@@ -1,0 +1,16 @@
+name: Shuttle Status
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 0/3 * * *'
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install
+      run: cargo install cargo-shuttle
+    - name: Status
+      run: cargo shuttle project status
