@@ -12,5 +12,9 @@ jobs:
     steps:
     - name: Install
       run: cargo install cargo-shuttle
+    - name: Clone
+      run: git clone https://github.com/Theboiboi8/kamela-bot.git
+    - name: CD
+      run: cd kamela-bot
     - name: Status
       run: cargo shuttle project status
