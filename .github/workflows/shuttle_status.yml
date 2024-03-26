@@ -13,5 +13,7 @@ jobs:
     - uses: actions/checkout@4
     - name: Install
       run: cargo install cargo-shuttle
+    - name: Login
+      run: cargo shuttle login ${{ secrets.SHUTTLE_API_KEY }}
     - name: Status
       run: cargo shuttle project status
