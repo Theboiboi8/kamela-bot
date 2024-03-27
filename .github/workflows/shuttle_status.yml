@@ -15,5 +15,5 @@ jobs:
       run: cargo install cargo-shuttle
     - name: Login
       run: cargo shuttle login --api-key ${{ secrets.SHUTTLE_API_KEY }}
-    - name: Status
-      run: cargo shuttle project status
+    - name: Restart
+      run: cargo shuttle project restart
