@@ -3,7 +3,7 @@ name: Shuttle Status
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 0/3 * * *'
+    - cron: '0 0/3 * * *'
 
 jobs:
   status:
