@@ -15,7 +15,7 @@ struct Bot {
 }
 
 #[async_trait]
-#[allow(clippy::unreadable_literal)]
+#[allow(clippy::unreadable_literal)] // Fixes some annoyances with Clippy and HEX literals
 impl EventHandler for Bot {
     async fn ready(&self, context : Context, ready : Ready) {
         info!("{} is connected!", ready.user.name);
@@ -36,7 +36,7 @@ impl EventHandler for Bot {
             CreateCommand::new("issues")
 	            .description("View all open Kamela Bot issues")
         ];
-	    
+
 	    let _commands_global =
 		    Command::set_global_commands(&context.http, commands_vec.clone());
 
@@ -145,7 +145,10 @@ async fn serenity(
     Ok(client.into())
 }
 
-#[allow(clippy::missing_panics_doc)]
+/// A method that returns the [`Client`]
+/// 
+/// # Panics
+/// Provide correct tokens and API keys
 pub async fn get_client(
 	discord_token: &str,
 	weather_api_key: &str,
