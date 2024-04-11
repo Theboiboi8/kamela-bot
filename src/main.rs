@@ -28,24 +28,28 @@ impl EventHandler for Bot {
 			        CreateCommandOption::new(
 				        serenity::all::CommandOptionType::String,
 				        "place",
-				        "City to return weather for"
+				        "City to return weather for. Required"
 			        )
-		        )
+		        ),
+	        CreateCommand::new("support")
+	            .description("Get support for Kamela Bot"),
+            CreateCommand::new("issues")
+	            .description("View all open Kamela Bot issues")
         ];
-
+	    
 	    let _commands_global =
 		    Command::set_global_commands(&context.http, commands_vec.clone());
 
         info!("Registered commands: {:#?}", commands_vec.clone());
     }
 
-    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+    async fn interaction_create(&self, context: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
             let response_content = match command.data.name.as_str() {
                 "info" => {
 	                CreateEmbed::new()
 		                .colour(0xDFFF00)
-		                .description("A general-purpose Discord bot.")
+		                .description("An open-source general-purpose Discord utility bot written in Rust.")
 		                .footer(CreateEmbedFooter::new(
 			                format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
 		                ))
@@ -67,7 +71,11 @@ impl EventHandler for Bot {
 				            CreateEmbed::new()
 					            .colour(0xDFFF00)
 					            .description(
-						            format!("Forecast: {} in {}", forecast.headline.overview, location)
+						            format!(
+							            "Forecast: {} in {}",
+							            forecast.headline.overview,
+							            location
+						            )
 					            )
 					            .footer(CreateEmbedFooter::new(
 						            format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
@@ -85,6 +93,24 @@ impl EventHandler for Bot {
 			            }
 		            }
 	            }
+	            "support" => {
+		            CreateEmbed::new()
+			            .colour(0xDFFF00)
+			            .description("Support")
+			            .footer(CreateEmbedFooter::new(
+				            format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
+			            ))
+			            .title("Get support for Kamela Bot at https://github.com/Theboiboi8/kamela-bot/issues/new")
+	            }
+	            "issues" => {
+		            CreateEmbed::new()
+			            .colour(0xDFFF00)
+			            .description("Issues")
+			            .footer(CreateEmbedFooter::new(
+				            format!("Kamela Bot v{}", env!("CARGO_PKG_VERSION"))
+			            ))
+			            .title("View all issues for Kamela Bot at https://github.com/Theboiboi8/kamela-bot/issues")
+	            }
                 command => unreachable!("Unknown command: {}", command),
             };
 
@@ -92,8 +118,8 @@ impl EventHandler for Bot {
 	            CreateInteractionResponseMessage::new().embed(response_content);
             let builder = CreateInteractionResponse::Message(data);
 
-            if let Err(why) = command.create_response(&ctx.http, builder).await {
-                println!("Cannot respond to slash command: {why}");
+            if let Err(why) = command.create_response(&context.http, builder).await {
+                println!("Cannot respond to command: {why}");
             }
         }
     }
@@ -124,8 +150,6 @@ pub async fn get_client(
 	discord_token: &str,
 	weather_api_key: &str,
 ) -> Client {
-    // Set gateway intents, which decides what events the bot will be notified about.
-    // Here we don't need any intents so empty
     let intents = GatewayIntents::default();
 
     Client::builder(discord_token, intents)
