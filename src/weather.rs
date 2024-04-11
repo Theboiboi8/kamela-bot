@@ -53,8 +53,8 @@ pub async fn get_forecast(
 	client: &Client,
 ) -> Result<(Location, Forecast), Box<dyn std::error::Error>> {
 	// Endpoints we will use
-	const LOCATION_REQUEST: &str = "http://dataservice.accuweather.com/locations/v1/cities/search";
-	const DAY_REQUEST: &str = "http://dataservice.accuweather.com/forecasts/v1/daily/1day/";
+	const LOCATION_REQUEST: &str = "https://dataservice.accuweather.com/locations/v1/cities/search";
+	const DAY_REQUEST: &str = "https://dataservice.accuweather.com/forecasts/v1/daily/1day/";
 
 	// The URL to call combined with our API_KEY and the place (via the q search parameter)
 	let url = format!("{LOCATION_REQUEST}?apikey={api_key}&q={place}");
