@@ -1,5 +1,5 @@
 use anyhow::Context as _;
-use serenity::all::{Command, CreateCommand, CreateCommandOption, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, Interaction};
+use serenity::all::{Command, CreateCommand, CreateCommandOption, CreateEmbed, CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, GuildId, Interaction};
 use serenity::async_trait;
 use serenity::gateway::ActivityData;
 use serenity::model::gateway::Ready;
@@ -19,7 +19,7 @@ struct Bot {
 impl EventHandler for Bot {
     async fn ready(&self, context : Context, ready : Ready) {
         info!("{} is connected!", ready.user.name);
-
+	    
         let commands_vec = vec![
             CreateCommand::new("info").description("Info about Kamela Bot"),
 	        CreateCommand::new("weather")
@@ -36,6 +36,9 @@ impl EventHandler for Bot {
             CreateCommand::new("issues")
 	            .description("View all open Kamela Bot issues")
         ];
+
+	    let test_guild = GuildId::new(1179163788285583432);
+		let _commands_test = test_guild.set_commands(&context.http, commands_vec.clone());
 
 	    let _commands_global =
 		    Command::set_global_commands(&context.http, commands_vec.clone());
