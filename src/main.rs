@@ -28,13 +28,13 @@ impl EventHandler for Bot {
 			        CreateCommandOption::new(
 				        serenity::all::CommandOptionType::String,
 				        "place",
-				        "City to return weather for. Required"
-			        )
+				        "City to return weather for.",
+			        ).required(true)
 		        ),
 	        CreateCommand::new("support")
 	            .description("Get support for Kamela Bot"),
             CreateCommand::new("issues")
-	            .description("View all open Kamela Bot issues")
+	            .description("View all open Kamela Bot issues"),
         ];
 
 	    let test_guild = GuildId::new(1179163788285583432);
