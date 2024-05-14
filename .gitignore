@@ -1,6 +1,6 @@
 /target
 /.idea
-
-.shuttle-storage
+/.shuttle-storage
 
 Secrets*.toml
+Cargo.lock
